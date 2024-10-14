@@ -1,0 +1,4 @@
+Librerías a descargar
+pip install webdriver-manager
+pip install selenium
+pip install playwright
