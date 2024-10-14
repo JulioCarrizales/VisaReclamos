@@ -1,51 +1,54 @@
-from playwright.sync_api import sync_playwright
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Cargar los datos desde el archivo Excel
+# Cargar el archivo Excel
 file_path = 'C:/Users/Administrador/Desktop/PROYECTOS_JULIO/VISA/data.xlsm'
 df = pd.read_excel(file_path, sheet_name=0)
 
 # Filtrar los datos donde no hay VROL
 filtered_df = df[df['VROL'].isna()]
 
-# Iniciar Playwright
-def run(playwright):
-    # Conectar al navegador ya abierto (asegúrate de tener el navegador conectado a Playwright)
-    browser = playwright.chromium.connect_over_cdp("http://localhost:9222")  # Asegúrate de abrir tu navegador con este puerto
-    page = browser.pages[0]  # Usar la primera página abierta
+# Configuración del controlador de Chrome con WebDriver Manager
+options = webdriver.ChromeOptions()  # Inicializar ChromeOptions
+service = Service(ChromeDriverManager().install())  # Usar WebDriver Manager para instalar y configurar ChromeDriver
 
-    # Procesar cada fila del dataframe filtrado
-    for index, row in filtered_df.iterrows():
-        card_number = str(row['NRO DE TARJETA \nCOMPROMETIDA']).strip()  # Tarjeta
-        transaction_date = pd.to_datetime(row['TRANSACTION \nDATE'])  # Fecha de transacción
-        authorization_code = str(row['AUTHORIZATION \nCODE']).strip()  # Código de autorización
+# Inicializar el controlador de Chrome con las opciones y el servicio
+driver = webdriver.Chrome(service=service, options=options)
 
-        # Restar un mes a la fecha de transacción para el campo Start Date
-        start_date = transaction_date - timedelta(days=30)
-        start_date_formatted = start_date.strftime("%m/%d/%y")
+# Abrir la página web
+driver.get("https://www.vrol.visaonline.com/rolol/AdminDispatcher?action=RouteToLandingPage&HTTP_ENTRY_POINT=&V=13")
 
-        # Obtener la fecha actual para el campo End Date
-        end_date_formatted = datetime.now().strftime("%m/%d/%y")
+# Procesar cada fila del DataFrame filtrado
+for index, row in filtered_df.iterrows():
+    card_number = str(row['NRO DE TARJETA \nCOMPROMETIDA']).strip()
+    transaction_date = pd.to_datetime(row['TRANSACTION \nDATE'])
+    authorization_code = str(row['AUTHORIZATION \nCODE']).strip()
 
-        # Ingresar el "Card/Account Number"
-        page.fill("input[name='CardAccountNumber']", card_number)
+    # Calcular Start Date restando un mes
+    start_date = transaction_date - timedelta(days=30)
+    start_date_formatted = start_date.strftime("%m/%d/%y")
 
-        # Ingresar el "Start Date"
-        page.fill("input[name='StartDate']", start_date_formatted)
+    # Formatear la fecha actual para End Date
+    end_date_formatted = datetime.now().strftime("%m/%d/%y")
 
-        # Ingresar el "End Date"
-        page.fill("input[name='EndDate']", end_date_formatted)
+    # Rellenar los campos del formulario
+    driver.find_element(By.NAME, "CardAccountNumber").send_keys(card_number)
+    driver.find_element(By.NAME, "StartDate").send_keys(start_date_formatted)
+    driver.find_element(By.NAME, "EndDate").send_keys(end_date_formatted)
+    driver.find_element(By.NAME, "AuthorizationCode").send_keys(authorization_code)
 
-        # Ingresar el "Authorization Code"
-        page.fill("input[name='AuthorizationCode']", authorization_code)
+    # Hacer clic en el botón "Submit"
+    driver.find_element(By.XPATH, '//button[@type="submit"]').click()
 
-        # Hacer clic en el botón "Submit"
-        page.click("button[type='submit']")
+    # Esperar unos segundos para verificar el envío antes de pasar al siguiente
+    driver.implicitly_wait(3)
 
-        # Esperar unos segundos para verificar el envío
-        page.wait_for_timeout(3000)
+# Mantener el navegador abierto para inspección manual
+input("Presiona Enter para cerrar el navegador...")
 
-# Ejecutar Playwright
-with sync_playwright() as playwright:
-    run(playwright)
+# Cerrar el navegador cuando se complete el proceso
+driver.quit()

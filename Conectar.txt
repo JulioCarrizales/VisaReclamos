@@ -1,0 +1,23 @@
+git init .
+
+git remote add origin https://github.com/JulioCarrizales/VisaReclamos.git
+git remote -v  <- Verificar si estás conectado
+
+git branch
+
+git branch Julio
+git checkout Julio 
+git add .
+git pull origin Julio
+
+git checkout Dany
+
+git add .
+git commit -m "Comentario"
+git push origin Dany
+
+
+
+
+
+
