@@ -1,0 +1,12 @@
+Librerías a descargar
+
+pip install selenium
+pip install playwright
+playwright install
+
+
+https://secure.visaonline.com/home
+
+USUARIO: ggutierrezag@bn.com.pe
+
+CLAVE: Estrellaviviana24.
