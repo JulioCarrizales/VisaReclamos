@@ -1,31 +1,51 @@
 from playwright.sync_api import sync_playwright
+import pandas as pd
+from datetime import datetime, timedelta
 
+# Cargar los datos desde el archivo Excel
+file_path = '/mnt/data/data.xlsm'
+df = pd.read_excel(file_path, sheet_name=0)
+
+# Filtrar los datos donde no hay VROL
+filtered_df = df[df['VROL'].isna()]
+
+# Iniciar Playwright
 def run(playwright):
-    # Lanzar el navegador
-    browser = playwright.chromium.launch(headless=False)
-    page = browser.new_page()
+    # Conectar al navegador ya abierto (asegúrate de tener el navegador conectado a Playwright)
+    browser = playwright.chromium.connect_over_cdp("http://localhost:9222")  # Asegúrate de abrir tu navegador con este puerto
+    page = browser.pages[0]  # Usar la primera página abierta
 
-    # Navegar a la página de Visa
-    page.goto("https://secure.visaonline.com/")
+    # Procesar cada fila del dataframe filtrado
+    for index, row in filtered_df.iterrows():
+        card_number = str(row['NRO DE TARJETA \nCOMPROMETIDA']).strip()  # Tarjeta
+        transaction_date = pd.to_datetime(row['TRANSACTION \nDATE'])  # Fecha de transacción
+        authorization_code = str(row['AUTHORIZATION \nCODE']).strip()  # Código de autorización
 
-    # Esperar que la página cargue completamente
-    page.wait_for_load_state('networkidle')
+        # Restar un mes a la fecha de transacción para el campo Start Date
+        start_date = transaction_date - timedelta(days=30)
+        start_date_formatted = start_date.strftime("%m/%d/%y")
 
-    # Completar los campos de login
-    page.fill("input[name='username']", "ggutierrezag@bn.com.pe")
-    page.fill("input[name='password']", "Estrellaviviana24.")
+        # Obtener la fecha actual para el campo End Date
+        end_date_formatted = datetime.now().strftime("%m/%d/%y")
 
-    # Esperar que el botón de "LOG IN" esté visible y habilitado
-    page.wait_for_selector("button[type='submit']", state='visible')
+        # Ingresar el "Card/Account Number"
+        page.fill("input[name='CardAccountNumber']", card_number)
 
-    # Hacer clic en el botón de "LOG IN"
-    page.click("button[type='submit']", force=True)  # Forzar clic
+        # Ingresar el "Start Date"
+        page.fill("input[name='StartDate']", start_date_formatted)
 
-    # Esperar para ver los resultados
-    page.wait_for_timeout(5000)  # 5 segundos de espera
+        # Ingresar el "End Date"
+        page.fill("input[name='EndDate']", end_date_formatted)
 
-    # Mantener el navegador abierto hasta que presiones Enter
-    input("Presiona Enter para cerrar el navegador...")
+        # Ingresar el "Authorization Code"
+        page.fill("input[name='AuthorizationCode']", authorization_code)
 
+        # Hacer clic en el botón "Submit"
+        page.click("button[type='submit']")
+
+        # Esperar unos segundos para verificar el envío
+        page.wait_for_timeout(3000)
+
+# Ejecutar Playwright
 with sync_playwright() as playwright:
     run(playwright)
