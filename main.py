@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # Cargar los datos desde el archivo Excel
-file_path = '/mnt/data/data.xlsm'
+file_path = 'C:/Users/Administrador/Desktop/PROYECTOS_JULIO/VISA/data.xlsm'
 df = pd.read_excel(file_path, sheet_name=0)
 
 # Filtrar los datos donde no hay VROL
