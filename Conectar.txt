@@ -16,6 +16,7 @@ git add .
 git commit -m "Comentario"
 git push origin Dany
 
+git push -- force origin Dany --- solo si sale error en amarillo
 
 
 

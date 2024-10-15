@@ -5,8 +5,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from datetime import datetime, timedelta
 
-#primer ss
-#Dany
 # Cargar el archivo Excel
 file_path = 'C:/Users/Administrador/Desktop/PROYECTOS_JULIO/VISA/data.xlsm'
 df = pd.read_excel(file_path, sheet_name=0)
