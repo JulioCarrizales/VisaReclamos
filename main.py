@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 # Cargar el archivo Excel proporcionado
-file_path = 'C:/Users/julio/Desktop/VISA/data.xlsm'
+file_path = 'C:/Users/Administrador/Desktop/PROYECTOS_JULIO/Canales_virtuales/data.xlsm'
 data = pd.read_excel(file_path)
 
 # Filtrar las filas donde la columna 'FECHA DEVOLUCIÓN' está vacía
@@ -111,14 +111,14 @@ class TestTest():
 
             # Esperar a que el campo "Card/Account Number" esté visible y seleccionarlo
             WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located((By.NAME, "Card/Account Number"))
+                EC.presence_of_element_located((By.ID, "CardNumber"))
             )
-            card_number_field = self.driver.find_element(By.NAME, "Card/Account Number")
+            card_number_field = self.driver.find_element(By.ID, "CardNumber")
             print("Localizado el campo 'Card/Account Number'")
             card_number_field.send_keys(nro_de_cuenta)
 
             # Hacer scroll para que el campo "Authorization Code" esté visible
-            auth_code_field = self.driver.find_element(By.NAME, "Authorization Code")
+            auth_code_field = self.driver.find_element(By.ID, "AuthCode")
             self.driver.execute_script("arguments[0].scrollIntoView();", auth_code_field)
             
             # Completar el campo "Authorization Code" con el valor de la columna T
@@ -128,7 +128,7 @@ class TestTest():
             auth_code_field.send_keys(auth_code)
 
             # Cambiar la fecha del campo "Start Date" a tres meses antes de la fecha actual
-            start_date_field = self.driver.find_element(By.NAME, "Start Date")
+            start_date_field = self.driver.find_element(By.ID, "StartDate")
             three_months_ago = (datetime.now() - timedelta(days=90)).strftime('%m/%d/%Y')
             print(f"Setting Start Date to: {three_months_ago}")
             start_date_field.clear()

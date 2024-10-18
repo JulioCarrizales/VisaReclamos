@@ -1,6 +1,6 @@
 import pandas as pd
 # Cargar el archivo Excel proporcionado
-file_path = 'C:/Users/julio/Desktop/VISA/data.xlsm'
+file_path = 'C:/Users/Administrador/Desktop/PROYECTOS_JULIO/Canales_virtuales/data.xlsm'
 data = pd.read_excel(file_path)
 
 # Filtrar las filas donde la columna 'FECHA DEVOLUCIÓN' está vacía
