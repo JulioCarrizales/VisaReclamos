@@ -1,3 +1,4 @@
+import pyperclip
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -5,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service  # Importar Service para manejar ChromeDriver
+from selenium.webdriver.chrome.service import Service
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -113,34 +114,37 @@ class TestTest():
             # Hacer clic en "Transaction Inquiry" una vez que aparece en el menú desplegable
             self.driver.find_element(By.LINK_TEXT, "Transaction Inquiry").click()
 
-            # COMPLETAR EL FORMULARIO
-
-            # Extraer el valor de la columna 'NRO DE TARJETA \nCOMPROMETIDA' en una variable
+            # COPIAR Y PEGAR DATOS DESDE EXCEL
             nro_de_cuenta = data_to_use.iloc[0]['NRO DE TARJETA \nCOMPROMETIDA']
-            print(f"Valor de NRO DE TARJETA: {nro_de_cuenta}")
+            authorization_code = data_to_use.iloc[0]['AUTHORIZATION \nCODE']
+
+            # Copiar el dato de la tarjeta al portapapeles
+            pyperclip.copy(nro_de_cuenta)
 
             # Esperar a que el campo "Card/Account Number" esté visible y seleccionarlo
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "CardNumber"))
             )
             card_number_field = self.driver.find_element(By.ID, "CardNumber")
-            print("Localizado el campo 'Card/Account Number'")
-            card_number_field.send_keys(nro_de_cuenta)
+            card_number_field.click()
+
+            # Pegar con Ctrl+V
+            card_number_field.send_keys(Keys.CONTROL, 'v')
+
+            # Copiar el Authorization Code al portapapeles
+            pyperclip.copy(authorization_code)
 
             # Hacer scroll para que el campo "Authorization Code" esté visible
             auth_code_field = self.driver.find_element(By.ID, "AuthCode")
             self.driver.execute_script("arguments[0].scrollIntoView();", auth_code_field)
             
-            # Completar el campo "Authorization Code" con el valor de la columna T
-            auth_code = data_to_use.iloc[0]['AUTHORIZATION \nCODE']
-            print(f"Valor de AUTHORIZATION CODE: {auth_code}")
-            print("Localizado el campo 'Authorization Code'")
-            auth_code_field.send_keys(auth_code)
+            # Pegar el Authorization Code
+            auth_code_field.click()
+            auth_code_field.send_keys(Keys.CONTROL, 'v')  # Pegar con Ctrl + V
 
             # Cambiar la fecha del campo "Start Date" a tres meses antes de la fecha actual
             start_date_field = self.driver.find_element(By.ID, "StartDate")
             three_months_ago = (datetime.now() - timedelta(days=90)).strftime('%m/%d/%Y')
-            print(f"Setting Start Date to: {three_months_ago}")
             start_date_field.clear()
             start_date_field.send_keys(three_months_ago)
 
@@ -154,4 +158,4 @@ class TestTest():
 # Ejecutar el script
 test = TestTest()
 test.setup_method()
-test.test_fill_form(data_to_use)  # Pasar los datos filtrados al test
+test.test_fill_form(data_to_use)
