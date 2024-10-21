@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from datetime import datetime, timedelta
 import pandas as pd
 
+#Nuevo
 # Cargar el archivo Excel proporcionado
 file_path = 'C:/Users/zarpa/OneDrive/Escritorio/VISA/data.xlsm'
 data = pd.read_excel(file_path)
@@ -15,7 +16,7 @@ data = pd.read_excel(file_path)
 filtered_data = data[data['FECHA DEVOLUCIÓN'].isna()]
 
 # Extraer las columnas 'NRO DE CUENTA \n(DEBITO/CREDITO)' y 'AUTHORIZATION \nCODE'
-data_to_use = filtered_data[['NRO DE CUENTA \n(DEBITO/CREDITO)', 'AUTHORIZATION \nCODE']]
+data_to_use = filtered_data[['NRO DE TARJETA \nCOMPROMETIDA', 'AUTHORIZATION \nCODE']]
 
 # Ver los primeros datos para comprobar la lectura
 print("Datos extraídos del Excel:")
@@ -96,10 +97,10 @@ class TestTest():
             self.driver.find_element(By.LINK_TEXT, "Transaction Inquiry").click()
 
             # Completar el formulario
-            nro_de_cuenta = data_to_use.iloc[0]['NRO DE CUENTA \n(DEBITO/CREDITO)']
+            nro_de_cuenta = data_to_use.iloc[0]['NRO DE TARJETA \nCOMPROMETIDA']
             print(f"Valor de NRO DE CUENTA: {nro_de_cuenta}")
 
-            WebDriverWait(self.driver, 20).until(
+            WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located((By.NAME, "Card/Account Number"))
             )
             card_number_field = self.driver.find_element(By.NAME, "Card/Account Number")
